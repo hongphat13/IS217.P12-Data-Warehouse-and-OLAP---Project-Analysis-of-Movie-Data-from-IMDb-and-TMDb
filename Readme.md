@@ -33,7 +33,7 @@ Raw Data → ETL Pipeline (SSIS) → Data Warehouse → OLAP Cube (SSAS) → Dat
 ```
 
 📌 *Sơ đồ kiến trúc tổng thể:*  
-![Star Schema Diagram][./Images/star_schema.png]
+![Star Schema Diagram](./Images/star_schema.png)
 
 ---
 
