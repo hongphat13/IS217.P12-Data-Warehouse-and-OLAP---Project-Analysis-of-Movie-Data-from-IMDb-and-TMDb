@@ -4,7 +4,7 @@
 
 **Tác giả:** Nguyễn Hồng Phát — *22521072*  
 **Lớp:** IS217.P12  
-**Liên hệ:** [LinkedIn](https://www.linkedin.com/in/your-profile-url/) | your.email@example.com
+**Liên hệ:** 22521072@gm.uit.edu.vn
 
 ---
 
@@ -101,5 +101,5 @@ Xây dựng mô hình học máy bằng **Python** với các thuật toán:
   
 ---
 
-📬 **Mọi góp ý và phản hồi xin vui lòng liên hệ qua LinkedIn hoặc email cá nhân.**  
+📬 **Mọi góp ý và phản hồi xin vui lòng liên hệ qua email cá nhân.**  
 Cảm ơn bạn đã quan tâm đến dự án!
