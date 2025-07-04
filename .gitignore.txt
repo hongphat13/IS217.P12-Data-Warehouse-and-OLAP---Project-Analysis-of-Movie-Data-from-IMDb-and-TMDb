@@ -1,0 +1,23 @@
+# Folder cài đặt của Visual Studio
+.vs/
+
+# Các file và folder tạm do Visual Studio tạo ra
+*.suo
+*.user
+*.sln.docstates
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# Cache của Python
+__pycache__/
+*.pyc
+
+# Các file cấu hình của IDE khác
+.idea/
+.vscode/
+
+# Các file hệ thống của Windows và macOS
+Thumbs.db
+.DS_Store

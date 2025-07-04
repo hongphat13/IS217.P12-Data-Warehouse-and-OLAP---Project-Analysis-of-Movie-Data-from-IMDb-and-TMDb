@@ -1,0 +1,203 @@
+﻿
+// Câu 1: Top 5 năm có tổng doanh thu cao nhất
+SELECT 
+    {[Measures].[Revenue]} ON COLUMNS,
+    SUBSET(
+        ORDER(
+            [Dim Date].[Year].Members, 
+            [Measures].[Revenue], BDESC
+        ), 
+        0, 5
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 2: Top 10 bộ phim có kinh phí sản xuất cao nhất, xếp giảm dần 
+SELECT 
+    {[Measures].[Budget]} ON COLUMNS,
+    TOPCOUNT(
+        [Dim Movie].[Title].[Title].Members,
+        10,
+        [Measures].[Budget]
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 3: Top 10 phim có nhiều lượt đánh giá nhất theo thứ tự giảm dần của độ phổ biến [Drill Down]
+SELECT 
+    {[Measures].[Popularity],[Measures].[Vote Count]} ON COLUMNS,
+    SUBSET(
+        ORDER(
+            [Dim Movie].[Title].[Title].Members, 
+            [Measures].[Vote Count], BDESC
+        ), 
+        0, 10
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 4: Truy vấn các tháng của mỗi năm 2020 có doanh thu > 10 triệu, sắp xếp theo thứ tự tăng dần trong tháng [Drill Down]
+SELECT 
+    [Measures].[Revenue] ON COLUMNS,
+    ORDER(
+        FILTER(
+            DrillDownMember(
+                [Dim Date].[Date_Hierarchy].[Month],
+                [Dim Date].[Date_Hierarchy].[Year]  
+            ) * [Dim Movie].[Title].[Title].Members,
+            [Measures].[Revenue] > 10000000
+        ),
+        [Measures].[Revenue],
+        ASC
+    ) ON ROWS
+FROM [SSIS]
+WHERE [Dim Date].[Year].&[2020];  
+
+// Câu 5: Liệt kê top 3 quốc gia sản xuất có doanh thu cao nhất trong từng năm 
+SELECT 
+    [Measures].[Revenue] ON COLUMNS,
+    NON EMPTY 
+    GENERATE(
+        [Dim Date].[Year].[Year].Members, 
+        HEAD(
+            ORDER(
+				[Dim Date].[Year].currentmember*[Dim Country].[Production Countries].Children,
+                [Measures].[Revenue], BDESC 
+            ),
+            3 
+        )
+    ) ON ROWS
+FROM [SSIS]; 
+
+// Câu 6: Truy vấn các quốc gia có doanh thu nằm trong top 10% của năm 2012 và đồng thời cũng nằm trong top 10% của năm 2013 
+SELECT 
+    {([Measures].[Revenue], [Dim Date].[Year].&[2013]), 
+     ([Measures].[Revenue], [Dim Date].[Year].&[2014])} ON COLUMNS,
+    INTERSECT(
+        TOPPERCENT(
+            [Dim Country].[Production Countries].Children, 
+            10, 
+            ([Measures].[Revenue], [Dim Date].[Year].&[2013])
+        ),
+        TOPPERCENT(
+            [Dim Country].[Production Countries].Children, 
+            10, 
+            ([Measures].[Revenue], [Dim Date].[Year].&[2014])
+        )
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 7: Top 7 các quốc gia có tổng doanh thu cao nhất với điểm đánh giá trung bình trên 6.5 trong năm 2014 // Chưa làm excel
+WITH MEMBER [Measures].[Average Rating]
+AS SUM(
+    [Dim Movie].[Title].[Title].Members,
+    [Measures].[Vote Average] * [Measures].[Vote Count]) / SUM(
+    [Dim Movie].[Title].[Title].Members,
+    [Measures].[Vote Count])
+
+select {[Measures].[Revenue],[Measures].[Average Rating]} on columns,
+	non empty
+		topcount(
+			filter(
+				[Dim Country].[Production Countries].[Production Countries].MEMBERS,
+				[Measures].[Revenue] > 10000000 AND [Measures].[AverageRating] > 6.5
+			),
+			7,
+			[Measures].[Revenue]
+		) ON ROWS
+FROM [SSIS]
+WHERE ([Dim Date].[Year].&[2014]);
+
+// Câu 8: Mỗi tháng trong năm 2018, liệt kê phim nổi tiếng nhất trong từng tháng 
+SELECT 
+    {[Measures].[Popularity]} ON COLUMNS,
+    NON EMPTY GENERATE(
+        [Dim Date].[Date_Hierarchy].[Month].Members,
+        TOPCOUNT(
+             [Dim Date].[Month].currentmember*[Dim Movie].[Title].[Title].Members, 
+            1,
+            ([Measures].[Popularity], [Dim Date].[Month].CurrentMember) 
+        )
+    ) ON ROWS
+FROM [SSIS] 
+WHERE ([Dim Date].[Year].&[2018]);
+
+// Câu 9: Top 10 công ty sản xuất có số lượng phim ít nhất
+SELECT 
+    {[Measures].[Number of Movies],[Measures].[Popularity] } ON COLUMNS,
+	NON EMPTY
+    BOTTOMCOUNT(
+        [Dim Company].[Production Companies].[Production Companies].Members,
+        10,
+        [Measures].[Number of Movies]
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 10: Thống kê số lượng phim, số lượt bình chọn và điểm đánh giá trung bình được sản xuất bởi các nước công ty Jules Jordan Video, Naughty America, Marvel Studios, Pixar và Digital Playground
+SELECT
+    { [Measures].[Number of Movies],
+      [Measures].[Vote Count],
+      [Measures].[AverageRating],
+	  [Measures].[Popularity]} ON COLUMNS,
+    TOPCOUNT({
+        [Dim Company].[Production Companies].[Jules Jordan Video],
+        [Dim Company].[Production Companies].[Naughty America],
+        [Dim Company].[Production Companies].[Marvel Studios],
+        [Dim Company].[Production Companies].[Pixar],
+		[Dim Company].[Production Companies].[Digital Playground]
+     }, 5, [Measures].[Number of Movies]) ON ROWS
+FROM [SSIS];
+
+// Câu 11: Thống kê số lượng phim, tổng số lượt đánh giá, và độ phổ biến theo thể loại phim và các ngôn ngữ khác nhau ( Việt, Hàn, Trung, Nhật)
+SELECT 
+    {[Measures].[Number of Movies], 
+      [Measures].[Vote Count], 
+      [Measures].[Popularity]} ON COLUMNS,
+    NON EMPTY 
+    CROSSJOIN(
+        [Dim Genres List].[Genres List].[Genres List].MEMBERS,
+        {[Dim Language].[Original Language].&[vi], 
+         [Dim Language].[Original Language].&[ko], 
+         [Dim Language].[Original Language].&[cn], 
+         [Dim Language].[Original Language].&[ja]}
+    ) ON ROWS
+FROM [SSIS];
+
+// Câu 12: Tổng kinh phí đầu tư hàng tháng và cả năm của các phim được sản xuất tại Mỹ với thời gian công chiếu là từ năm 2017 đến năm 2019
+SELECT 
+    [Measures].[Budget] ON COLUMNS,
+    DrillDownLevel(
+        [Dim Date].[Date_Hierarchy].[Year].&[2017] : [Dim Date].[Date_Hierarchy].[Year].&[2019]
+    ) ON ROWS
+FROM [SSIS]
+WHERE ([Dim Country].[Production Countries].&[United States of America]);
+
+// Câu 13: Thống kê số lượng phim, tổng số lượt đánh giá, điểm đánh giá trung bình và độ phổ biến của các bộ phim có ngôn ngữ gốc là tiếng Anh và Pháp và được phát hành từ năm 2016 đến 2023 và có công ty sản xuất tại Mỹ
+SELECT 
+     {[Measures].[Number of Movies],[Measures].[Vote Count], [Measures].[AverageRating],[Measures].[Popularity]} ON COLUMNS,
+	 Non empty
+    ([Dim Date].[Year].&[2016] : [Dim Date].[Year].&[2023],
+     {[Dim Language].[Original Language].&[fr],
+	 [Dim Language].[Original Language].&[en]}) ON ROWS
+FROM [SSIS]
+WHERE ([Dim Country].[Production Countries].&[United States of America]);
+
+// Câu 14: Thống kê số lượng phim của các công ty sản xuất theo các tháng từ năm 2014 đến năm 2017
+SELECT 
+    {[Measures].[Number of Movies]} ON COLUMNS,
+        NONEMPTY(
+            CROSSJOIN(
+                [Dim Company].[Production Companies].[Production Companies].Members,
+                [Dim Date].[Month].[Month].Members
+            ),
+            {[Measures].[Revenue]}
+        ) ON ROWS
+FROM [SSIS]
+WHERE ([Dim Date].[Year].&[2014] : [Dim Date].[Year].&[2017]);
+
+// Câu 15: Tính tổng số lượng phim theo thể loại và đạo diễn 
+SELECT 
+    {[Measures].[Number of Movies]} ON COLUMNS,
+    NON EMPTY
+    CROSSJOIN(
+        [Dim Genres List].[Genres List].[Genres List].Members, 
+        [Dim Director].[Director].[Director].Members
+    ) ON ROWS
+FROM [SSIS];
