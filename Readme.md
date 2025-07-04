@@ -84,19 +84,19 @@ Xây dựng mô hình học máy bằng **Python** với các thuật toán:
 ### 5.1. Cài đặt cơ sở dữ liệu
 
 - Yêu cầu: Cài đặt **SQL Server 2022** (bao gồm *Database Engine* và *Analysis Services – Multidimensional*)  
-- Thực thi script `/database/create_database.sql` để tạo **CSDL Movie_wh**
+- Thực thi script `/Database/create_database.sql` để tạo **CSDL Movie_wh**
 
 ### 5.2. Triển khai ETL & OLAP
 
-- Mở SSIS Project tại `/source_code/1_ssis_etl_pipeline/` bằng **Visual Studio**  
+- Mở SSIS Project tại `/Source_Code/ETL-SSIS/` bằng **Visual Studio**  
 - Chạy gói để thực hiện ETL và nạp dữ liệu vào Data Warehouse  
-- Mở SSAS Project tại `/source_code/2_ssas_olap_cube/`, cập nhật `Data Source`, và **Deploy** Cube  
+- Mở SSAS Project tại `/Source_Code/OLAP-SSAS/`, cập nhật `Data Source`, và **Deploy** Cube  
 
 ### 5.3. Phân tích & trực quan hóa
 
-- Tham khảo các truy vấn **MDX** tại `/source_code/3_mdx_queries/`  
-- Mở file Notebook tại `/source_code/4_data_mining_model/` để khám phá mô hình dự đoán  
-- Khám phá báo cáo và Dashboard tại `/source_code/5_visualization/`
+- Tham khảo các truy vấn **MDX** tại `/Source_Code/MDX Queries/`  
+- Mở file Notebook tại `/Source_Code/Data Mining/` để khám phá mô hình dự đoán  
+- Khám phá báo cáo và Dashboard tại `/Source_Code/Visualization/`
   
 ---
 
